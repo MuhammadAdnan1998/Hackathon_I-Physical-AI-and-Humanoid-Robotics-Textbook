@@ -1,0 +1,200 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* Custom properties for colors */
+:root {
+  --ifm-color-primary: #667eea;
+  --ifm-color-primary-dark: #5a6fe0;
+  --ifm-color-primary-darker: #5466d7;
+  --ifm-color-primary-darkest: #4552b3;
+  --ifm-color-primary-light: #7282f3;
+  --ifm-color-primary-lighter: #798af6;
+  --ifm-color-primary-lightest: #93a0fb;
+
+  /* Dark theme colors */
+  --custom-color-dark-background-1: #1B1B1D;
+  --custom-color-dark-background-2: #0f0f11;
+  --custom-color-text-white: #ffffff;
+  --custom-color-text-light-gray: #b0b0b0;
+  --custom-color-border-gray: #808080;
+  --custom-color-indigo-highlight: #667eea;
+}
+
+/* Ensure dark mode is applied */
+html[data-theme='dark'] {
+  --ifm-background-color: var(--custom-color-dark-background-2);
+  --ifm-font-color-base: var(--custom-color-text-light-gray);
+  --ifm-hero-background-color: linear-gradient(to right, var(--custom-color-dark-background-1), var(--custom-color-dark-background-2));
+  --ifm-footer-background-color: var(--custom-color-dark-background-1);
+}
+
+/* General styling for body and fonts */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global Link Hover Effects */
+a {
+  color: var(--ifm-color-primary); /* Default link color */
+  transition: color 0.3s ease-in-out; /* Smooth transition for color */
+}
+
+a:hover {
+  color: var(--ifm-color-primary-light); /* Lighter on hover */
+  text-decoration: none; /* No underline */
+  transform: translateY(-2px); /* Slight lift for all links */
+}
+
+/* Footer specific link hover effects (override global) */
+.footer__link-item {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  padding-bottom: 2px; /* Space for the border */
+}
+
+.footer__link-item::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 1px;
+  background-color: var(--custom-color-indigo-highlight);
+  transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.footer__link-item:hover {
+  color: var(--custom-color-indigo-highlight);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Cinematic shadow */
+}
+
+.footer__link-item:hover::before {
+  width: 100%;
+}
+
+/* Hero Banner Styling */
+.heroBanner {
+  padding: 4rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(to right, var(--custom-color-dark-background-1), var(--custom-color-dark-background-2));
+  color: var(--custom-color-text-white);
+}
+
+.heroBanner h1 {
+  color: var(--custom-color-text-white);
+  font-size: 3.5rem; /* Larger font size for hero title */
+}
+
+.heroBanner p {
+  color: var(--custom-color-text-light-gray);
+  font-size: 1.5rem;
+}
+
+/* Features Section Styling (will be applied to HomepageFeatures component) */
+.features {
+  background-color: var(--custom-color-dark-background-2);
+  padding: 4rem 0;
+}
+
+/* Individual Feature Card Styling */
+.featureCard {
+  background-color: var(--custom-color-dark-background-1);
+  border: 1px solid var(--custom-color-border-gray);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.featureCard:hover {
+  border-color: var(--custom-color-indigo-highlight);
+  transform: translateY(-5px); /* Lift effect */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Subtle shadow for elevation */
+}
+
+.featureCard h3 {
+  color: var(--custom-color-text-white);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.featureCard p {
+  color: var(--custom-color-text-light-gray);
+}
+
+.featureCard .emoji {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* CTA Section Styling (will apply to main section below features) */
+.ctaSection {
+  background: linear-gradient(to right, var(--custom-color-dark-background-1), var(--custom-color-dark-background-2));
+  padding: 5rem 0;
+  text-align: center;
+  color: var(--custom-color-text-white);
+}
+
+.ctaSection h2 {
+  color: var(--custom-color-text-white);
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.button--primary-cta {
+  background-color: var(--ifm-color-primary);
+  color: var(--custom-color-text-white);
+  border: 1px solid var(--ifm-color-primary);
+  transition: all 0.3s ease-in-out;
+}
+
+.button--primary-cta:hover {
+  background-color: var(--ifm-color-primary-dark);
+  color: var(--custom-color-text-white);
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.button--secondary-cta {
+  background-color: transparent;
+  color: var(--ifm-color-primary);
+  border: 1px solid var(--ifm-color-primary);
+  transition: all 0.3s ease-in-out;
+}
+
+.button--secondary-cta:hover {
+  background-color: var(--ifm-color-primary);
+  color: var(--custom-color-text-white);
+  border-color: var(--ifm-color-primary);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 2rem;
+  }
+
+  .heroBanner h1 {
+    font-size: 2.5rem;
+  }
+
+  .heroBanner p {
+    font-size: 1.2rem;
+  }
+
+  .ctaSection h2 {
+    font-size: 2rem;
+  }
+}
