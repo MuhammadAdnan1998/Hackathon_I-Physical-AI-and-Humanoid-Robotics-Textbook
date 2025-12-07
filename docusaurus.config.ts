@@ -126,7 +126,7 @@ const config: Config = {
             },
             {
               label: 'About Us',
-              to: '/about', // Placeholder for a future about page
+              to: '/', // Temporarily linking to homepage until a dedicated about page is created
             },
           ],
         },
