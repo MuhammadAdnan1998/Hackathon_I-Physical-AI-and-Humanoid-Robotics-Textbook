@@ -73,3 +73,22 @@ As a student, I want to understand how I will be evaluated, so I need a clear de
 -   **SC-002**: The "Hardware Requirements", "Learning Outcomes", and "Assessments" pages are easily discoverable from the main navigation.
 -   **SC-003**: All content placeholders in the functional requirements are filled with the correct and final information.
 -   **SC-004**: The final rendered site structure directly mirrors the specified weekly breakdown and content hierarchy.
+
+## RAG Chatbot Integration Feature
+
+### 1. Core Functionality
+The chatbot must be embedded within the Docusaurus site and respond only to questions about the book's content (Physical AI, ROS 2, Isaac Sim, etc.).
+
+### 2. Contextual Mode
+The bot must specifically handle contextual queries based on user-selected text within the documentation, sending that selected text as part of the RAG prompt.
+
+### 3. Technical Stack (Advanced ChatKit Integration)
+The FastAPI server must implement the Advanced ChatKit Integration pattern.
+
+*   **Backend Focus**: The FastAPI server must primarily expose a single, secure `/api/chatkit/session` (or `/token`) endpoint for managing ChatKit sessions.
+*   **Session Logic**: This endpoint will be responsible for securely managing the ChatKit session by generating a short-lived Client Secret (or token) required by the frontend.
+*   **RAG Integration Point**: The RAG logic (Qdrant retrieval, contextual query processing) must be integrated using the ChatKit Python SDK within the FastAPI backend, or by referencing an external OpenAI Agent Workflow ID if the RAG is hosted externally.
+*   **Frontend**: The Docusaurus React component must utilize the `@openai/chatkit-react` library to render the UI and call the FastAPI session endpoint for authentication.
+
+### 4. Acceptance
+The bot must correctly cite sources from the book content when answering questions.

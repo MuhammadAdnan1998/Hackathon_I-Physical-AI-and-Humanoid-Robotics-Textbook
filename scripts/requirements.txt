@@ -1,0 +1,4 @@
+openai
+qdrant-client
+beautifulsoup4
+markdown-it-py
