@@ -44,7 +44,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/abdul-rehan7/Hackathon-I-Physical-AI-Humanoid-Robotics/tree/main/',
+            'https://github.com/MuhammadAdnan1998/Hackathon_I-Physical-AI-and-Humanoid-Robotics-Textbook/tree/main/',
         },
         blog: {
           showReadingTime: true,
@@ -55,7 +55,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/abdul-rehan7/Hackathon-I-Physical-AI-Humanoid-Robotics/tree/main/',
+            'https://github.com/MuhammadAdnan1998/Hackathon_I-Physical-AI-and-Humanoid-Robotics-Textbook/tree/main/',
           // Useful options to enforce blogging best practices
           onInlineTags: 'warn',
           onInlineAuthors: 'warn',
@@ -90,7 +90,7 @@ const config: Config = {
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/abdul-rehan7/Hackathon-I-Physical-AI-Humanoid-Robotics',
+          href: 'https://github.com/MuhammadAdnan1998/Hackathon_I-Physical-AI-and-Humanoid-Robotics-Textbook',
           label: 'GitHub',
           position: 'right',
         },
@@ -113,7 +113,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/abdul-rehan7/Hackathon-I-Physical-AI-Humanoid-Robotics',
+              href: 'https://github.com/MuhammadAdnan1998/Hackathon_I-Physical-AI-and-Humanoid-Robotics-Textbook',
             },
           ],
         },
