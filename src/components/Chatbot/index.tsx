@@ -1,56 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import React, { useState, useEffect, useRef } from 'react';
 import {
-    MainContainer,
-    ChatContainer,
-    MessageList,
-    Message,
-    MessageInput,
-    ConversationHeader,
-    Avatar
-} from "@chatscope/chat-ui-kit-react";
+    ChatKit,
+    ChatKitAvatar,
+    ChatKitComposer,
+    ChatKitMessage,
+    ChatKitMessageList,
+    ChatKitWindow,
+} from '@openai/chatkit-react';
 
-const Chatbot = () => {
-    const [messages, setMessages] = useState([]);
-    const [selectedText, setSelectedText] = useState('');
+const ASSISTANT_ID = "book-rag-assistant"; // Must match the assistant ID in the backend
+
+const Chatbot: React.FC = () => {
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [selectedText, setSelectedText] = useState<string>('');
     const [askButtonPosition, setAskButtonPosition] = useState({ top: 0, left: 0, display: 'none' });
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    
+    const composerRef = useRef<{ setText: (text: string) => void } | null>(null);
 
-    const handleSend = async (message) => {
-        const newMessage = {
-            message,
-            direction: 'outgoing',
-            sender: "user"
+    // T074: Fetch ChatKit session client secret
+    useEffect(() => {
+        const fetchSession = async () => {
+            try {
+                const response = await fetch('/api/chatkit/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: 'anonymous-user' }), // Example user ID
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch ChatKit session');
+                }
+                const data = await response.json();
+                setClientSecret(data.client_secret);
+            } catch (error) {
+                console.error('ChatKit session error:', error);
+            }
         };
-        setMessages([...messages, newMessage]);
-        
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ query: message, context_text: selectedText })
-        });
-        const data = await response.json();
 
-        const botMessage = {
-            message: `${data.answer}\n\nSources: ${data.sources.join(', ')}`,
-            direction: 'incoming',
-            sender: "bot"
-        };
-        setMessages([...messages, newMessage, botMessage]);
-        setSelectedText('');
-    };
+        fetchSession();
+    }, []);
 
+    // T076 & T077: Handle text selection
     const handleMouseUp = () => {
         const selection = window.getSelection();
-        if (selection.toString().length > 0) {
+        const text = selection?.toString().trim();
+        if (text && text.length > 10) { // Only show for reasonably long selections
             const range = selection.getRangeAt(0);
             const rect = range.getBoundingClientRect();
-            setSelectedText(selection.toString());
+            setSelectedText(text);
             setAskButtonPosition({
-                top: rect.bottom + window.scrollY,
+                top: rect.bottom + window.scrollY + 5, // Position below selection
                 left: rect.left + window.scrollX,
-                display: 'block'
+                display: 'block',
             });
         } else {
             setAskButtonPosition({ top: 0, left: 0, display: 'none' });
@@ -63,41 +64,67 @@ const Chatbot = () => {
             document.removeEventListener('mouseup', handleMouseUp);
         };
     }, []);
-
+    
+    // T078: Handle "Ask about this" button click
     const handleAskAboutSelection = () => {
-        handleSend(selectedText);
-        setAskButtonPosition({ top: 0, left: 0, display: 'none' });
+        if (composerRef.current) {
+            const query = `Based on the following text, can you explain it further?
+
+---
+${selectedText}
+---`;
+            composerRef.current.setText(query);
+        }
+        setIsOpen(true); // Open the chat window
+        setAskButtonPosition({ top: 0, left: 0, display: 'none' }); // Hide the button
+    };
+
+    if (!clientSecret) {
+        return null; // Or a loading indicator
     }
 
     return (
-        <div style={{ position: 'fixed', bottom: '20px', right: '20px', height: '500px', width: '350px', zIndex: 1000 }}>
-            <MainContainer>
-                <ChatContainer>
-                    <ConversationHeader>
-                        <Avatar src="/img/logo.svg" name="Bot" />
-                        <ConversationHeader.Content userName="Book Assistant" info="Ask me anything about the book" />
-                    </ConversationHeader>
-                    <MessageList>
-                        {messages.map((msg, i) => (
-                            <Message key={i} model={msg} />
-                        ))}
-                    </MessageList>
-                    <MessageInput placeholder="Type message here" onSend={handleSend} />
-                </ChatContainer>
-            </MainContainer>
+        <>
+            {/* T075: Floating chatbot window */}
+            <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 }}>
+                <ChatKit
+                    clientSecret={clientSecret}
+                    assistantId={ASSISTANT_ID}
+                    isOpen={isOpen}
+                    onClose={() => setIsOpen(false)}
+                    onOpen={() => setIsOpen(true)}
+                >
+                        {/* T073: ChatKit UI Components */}
+                    <ChatKitWindow>
+                        <header>
+                            <ChatKitAvatar name="Book Assistant" />
+                            <h3>Book Assistant</h3>
+                        </header>
+                        <ChatKitMessageList />
+                        <ChatKitComposer ref={composerRef} />
+                    </ChatKitWindow>
+                </ChatKit>
+            </div>
+            {/* "Ask about this" button */}
             <button
                 style={{
                     position: 'absolute',
-                    top: askButtonPosition.top,
-                    left: askButtonPosition.left,
+                    top: `${askButtonPosition.top}px`,
+                    left: `${askButtonPosition.left}px`,
                     display: askButtonPosition.display,
-                    zIndex: 1001
+                    zIndex: 1001,
+                    padding: '5px 10px',
+                    borderRadius: '5px',
+                    border: '1px solid #ccc',
+                    background: '#fff',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
                 }}
                 onClick={handleAskAboutSelection}
             >
                 Ask about this
             </button>
-        </div>
+        </>
     );
 };
 

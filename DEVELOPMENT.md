@@ -25,6 +25,26 @@ Follow these steps to get your local development environment ready:
     npm install
     ```
 
+## Environment Variables
+
+The application requires certain environment variables to be set for full functionality, particularly for the vectorization script and the RAG chatbot API.
+
+Create a `.env` file in the root of the project and add the following variables:
+
+```
+# OpenAI API Key
+OPENAI_API_KEY="your-openai-api-key"
+
+# Qdrant Cloud connection details
+QDRANT_URL="your-qdrant-cloud-url"
+QDRANT_API_KEY="your-qdrant-api-key"
+
+# OpenAI ChatKit Secret Key
+CHATKIT_SECRET_KEY="your-chatkit-secret-key"
+```
+
+**Note**: The Python scripts (`scripts/vectorize.py` and `api/main.py`) are configured to load these variables from the environment. Ensure the `.env` file is present or that these variables are exported in your shell.
+
 ## Running Locally
 
 To start the local development server and view the online book:

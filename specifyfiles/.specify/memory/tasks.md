@@ -222,17 +222,17 @@ This task list breaks down the implementation plan for creating the online book'
 
 **Goal**: Set up the pipeline to process and vectorize the book's content.
 
-- [ ] **T050**: Create a `scripts/` directory at the project root if it doesn't exist.
-- [ ] **T051**: Create `scripts/vectorize.py` and a corresponding `scripts/requirements.txt` with dependencies: `openai`, `qdrant-client`, `beautifulsoup4`, `markdown-it-py`.
-- [ ] **T052**: In `vectorize.py`, implement a function to scan the `docs/` directory for all `.md` and `.mdx` files.
-- [ ] **T053**: In `vectorize.py`, implement a function to parse Markdown/MDX content into clean, readable text, removing front matter and JSX.
-- [ ] **T054**: In `vectorize.py`, implement a text splitting function to chunk text into smaller segments (500-1000 characters) with overlap.
-- [ ] **T055**: In `vectorize.py`, enhance the chunking process to include metadata (source file path, headings).
-- [ ] **T056**: In `vectorize.py`, implement a function to generate embeddings for text chunks using the OpenAI `text-embedding-3-small` model.
-- [ ] **T057**: In `vectorize.py`, implement a function to connect to Qdrant Cloud.
-- [ ] **T058**: In `vectorize.py`, create a new Qdrant collection named `book_content_v1` if it doesn't already exist.
-- [ ] **T059**: In `vectorize.py`, implement the logic to batch-upload the vectors and their metadata to the Qdrant collection.
-- [ ] **T060**: Create a main execution block in `vectorize.py` to run the full pipeline: scan, parse, chunk, embed, and upload.
+- [x] **T050**: Create a `scripts/` directory at the project root if it doesn't exist.
+- [x] **T051**: Create `scripts/vectorize.py` and a corresponding `scripts/requirements.txt` with dependencies: `openai`, `qdrant-client`, `beautifulsoup4`, `markdown-it-py`.
+- [x] **T052**: In `vectorize.py`, implement a function to scan the `docs/` directory for all `.md` and `.mdx` files.
+- [x] **T053**: In `vectorize.py`, implement a function to parse Markdown/MDX content into clean, readable text, removing front matter and JSX.
+- [x] **T054**: In `vectorize.py`, implement a text splitting function to chunk text into smaller segments (500-1000 characters) with overlap.
+- [x] **T055**: In `vectorize.py`, enhance the chunking process to include metadata (source file path, headings).
+- [x] **T056**: In `vectorize.py`, implement a function to generate embeddings for text chunks using the OpenAI `text-embedding-3-small` model.
+- [x] **T057**: In `vectorize.py`, implement a function to connect to Qdrant Cloud.
+- [x] **T058**: In `vectorize.py`, create a new Qdrant collection named `book_content_v1` if it doesn't already exist.
+- [x] **T059**: In `vectorize.py`, implement the logic to batch-upload the vectors and their metadata to the Qdrant collection.
+- [x] **T060**: Create a main execution block in `vectorize.py` to run the full pipeline: scan, parse, chunk, embed, and upload.
 
 ---
 
@@ -240,15 +240,15 @@ This task list breaks down the implementation plan for creating the online book'
 
 **Goal**: Implement the FastAPI backend for secure ChatKit session management and RAG logic integration.
 
-- [ ] **T061**: Create an `api/` directory at the project root if it doesn't exist.
-- [ ] **T062**: Inside `api/`, create a `requirements.txt` with dependencies: `fastapi`, `uvicorn`, `openai`, `qdrant-client`, `pydantic`, `openai-chatkit`.
-- [ ] **T063**: Create `api/main.py` for the FastAPI application.
-- [ ] **T064**: In `api/main.py`, implement the POST endpoint `/api/chatkit/session` (or `/token`).
-- [ ] **T065**: In `api/main.py`, implement logic within the session endpoint to securely generate a short-lived Client Secret (or token) for ChatKit.
-- [ ] **T066**: Integrate the Qdrant retrieval logic (using `qdrant-client`) into the FastAPI application, ensuring it can fetch relevant text chunks based on user queries.
-- [ ] **T067**: Implement RAG processing using the `openai-chatkit` SDK within the FastAPI application. This involves using the SDK to orchestrate contextual query processing and interaction with the OpenAI LLM.
-- [ ] **T068**: Configure the ChatKit integration to reference an external OpenAI Agent Workflow ID if the RAG logic is hosted externally, or define the RAG agent within the FastAPI application using the ChatKit SDK.
-- [ ] **T069**: Ensure the FastAPI application correctly processes LLM responses to extract answers and source links, returning them in a format consumable by ChatKit.
+- [x] **T061**: Create an `api/` directory at the project root if it doesn't exist.
+- [x] **T062**: Inside `api/`, create a `requirements.txt` with dependencies: `fastapi`, `uvicorn`, `openai`, `qdrant-client`, `pydantic`, `openai-chatkit`.
+- [x] **T063**: Create `api/main.py` for the FastAPI application.
+- [x] **T064**: In `api/main.py`, implement the POST endpoint `/api/chatkit/session` (or `/token`).
+- [x] **T065**: In `api/main.py`, implement logic within the session endpoint to securely generate a short-lived Client Secret (or token) for ChatKit.
+- [x] **T066**: Integrate the Qdrant retrieval logic (using `qdrant-client`) into the FastAPI application, ensuring it can fetch relevant text chunks based on user queries.
+- [x] **T067**: Implement RAG processing using the `openai-chatkit` SDK within the FastAPI application. This involves using the SDK to orchestrate contextual query processing and interaction with the OpenAI LLM.
+- [x] **T068**: Configure the ChatKit integration to reference an external OpenAI Agent Workflow ID if the RAG logic is hosted externally, or define the RAG agent within the FastAPI application using the ChatKit SDK.
+- [x] **T069**: Ensure the FastAPI application correctly processes LLM responses to extract answers and source links, returning them in a format consumable by ChatKit.
 
 ---
 
@@ -256,14 +256,14 @@ This task list breaks down the implementation plan for creating the online book'
 
 **Goal**: Integrate the ChatKit UI and functionality into the Docusaurus site using the Advanced ChatKit Integration pattern.
 
-- [ ] **T070**: Create the directory `src/components/Chatbot` if it doesn't exist.
-- [ ] **T071**: Create the React component file `src/components/Chatbot/index.tsx`.
-- [ ] **T072**: Install `@openai/chatkit-react` as a project dependency in `package.json`.
-- [ ] **T073**: In `src/components/Chatbot/index.tsx`, use components from `@openai/chatkit-react` to build the chat window, message list, and input field.
-- [ ] **T074**: Implement logic in `src/components/Chatbot/index.tsx` to call the FastAPI session endpoint (`/api/chatkit/session` or `/token`) for authentication and to obtain the Client Secret.
-- [ ] **T075**: Style the chatbot component to be a floating element in the bottom-right corner.
-- [ ] **T076**: Implement a global `mouseup` event listener in `src/components/Chatbot/index.tsx` to capture selected text from `window.getSelection()`.
-- [ ] **T077**: Implement logic to show a small "Ask about this" button near the selected text.
-- [ ] **T078**: Ensure captured selected text can be passed to the ChatKit agent as additional context for contextual queries.
-- [ ] **T079**: Create the file `src/theme/Root.tsx` if it doesn't exist.
-- [ ] **T080**: In `src/theme/Root.tsx`, import and render the `<Chatbot />` component to make it available on all pages.
+- [x] **T070**: Create the directory `src/components/Chatbot` if it doesn't exist.
+- [x] **T071**: Create the React component file `src/components/Chatbot/index.tsx`.
+- [x] **T072**: Install `@openai/chatkit-react` as a project dependency in `package.json`.
+- [x] **T073**: In `src/components/Chatbot/index.tsx`, use components from `@openai/chatkit-react` to build the chat window, message list, and input field.
+- [x] **T074**: Implement logic in `src/components/Chatbot/index.tsx` to call the FastAPI session endpoint (`/api/chatkit/session` or `/token`) for authentication and to obtain the Client Secret.
+- [x] **T075**: Style the chatbot component to be a floating element in the bottom-right corner.
+- [x] **T076**: Implement a global `mouseup` event listener in `src/components/Chatbot/index.tsx` to capture selected text from `window.getSelection()`.
+- [x] **T077**: Implement logic to show a small "Ask about this" button near the selected text.
+- [x] **T078**: Ensure captured selected text can be passed to the ChatKit agent as additional context for contextual queries.
+- [x] **T079**: Create the file `src/theme/Root.tsx` if it doesn't exist.
+- [x] **T080**: In `src/theme/Root.tsx`, import and render the `<Chatbot />` component to make it available on all pages.
