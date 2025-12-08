@@ -1,29 +1,80 @@
 import os
+import httpx
+import openai
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Optional
-from openai import OpenAI
-import qdrant_client
+from qdrant_client import QdrantClient
 from openai_chatkit import ChatKit
 
-# Initialize FastAPI app
-app = FastAPI()
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+    )
+    debug: bool = True
+    host: str = "0.0.0.0"
+    port: int = 8000
+    openai_api_key: SecretStr
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_api_key: SecretStr
+    chatkit_secret_key: SecretStr
 
-# --- Environment Variables & Clients ---
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-QDRANT_URL = os.environ.get("QDRANT_URL")
-QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")
-CHATKIT_SECRET_KEY = os.environ.get("CHATKIT_SECRET_KEY") # This is a new required secret
+class Context:
+    def __init__(self, settings: Settings):
+        self.settings = settings
+        self.http_client: httpx.AsyncClient | None = None
+        self.qdrant_client: QdrantClient | None = None
+        self.openai_client: openai.AsyncOpenAI | None = None
+        self.chatkit: ChatKit | None = None
 
-# Ensure all necessary environment variables are set
-if not all([OPENAI_API_KEY, QDRANT_URL, QDRANT_API_KEY, CHATKIT_SECRET_KEY]):
-    raise ValueError("One or more required environment variables are not set.")
+    async def startup(self):
+        self.http_client = httpx.AsyncClient()
+        self.qdrant_client = QdrantClient(
+            self.settings.qdrant_url,
+            api_key=self.settings.qdrant_api_key.get_secret_value(),
+        )
+        self.openai_client = openai.AsyncOpenAI(
+            api_key=self.settings.openai_api_key.get_secret_value()
+        )
+        self.chatkit = ChatKit(secret_key=self.settings.chatkit_secret_key.get_secret_value())
 
-# Initialize clients
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
-qdrant_client_instance = qdrant_client.QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
-chatkit = ChatKit(secret_key=CHATKIT_SECRET_KEY)
+    async def shutdown(self):
+        if self.http_client:
+            await self.http_client.aclose()
+        if self.openai_client:
+            # an issue with openai client that it hangs on shutdown, so we are not closing it
+            # await self.openai_client.close()
+            pass
+
+def get_fast_api_app(settings: Settings) -> FastAPI:
+    app = FastAPI(
+        title="AI-Tutor API",
+        version="0.1.0",
+        description="AI-Tutor API",
+        debug=settings.debug,
+    )
+
+    @app.on_event("startup")
+    async def startup():
+        context = Context(settings)
+        await context.startup()
+        app.state.context = context
+
+    @app.on_event("shutdown")
+    async def shutdown():
+        context: Context = app.state.context
+        await context.shutdown()
+
+    # app.include_router(chat.router, prefix="/chat", tags=["chat"])
+
+    return app
+
+settings = Settings()
+app = get_fast_api_app(settings)
 
 # --- Pydantic Models ---
 class SessionRequest(BaseModel):
@@ -41,20 +92,20 @@ class ChatResponse(BaseModel):
     sources: List[str]
 
 # --- ChatKit Tool: Qdrant Vector Search ---
-@chatkit.tool()
+@app.state.context.chatkit.tool()
 def retrieve_context(query: str, context_text: Optional[str] = None) -> str:
     """
     Retrieves relevant context from the Qdrant vector database based on the user's query.
     """
     query_to_embed = f"{context_text}\n\n{query}" if context_text else query
     
-    response = openai_client.embeddings.create(
+    response = app.state.context.openai_client.embeddings.create(
         input=query_to_embed,
         model="text-embedding-3-small"
     )
     query_vector = response.data[0].embedding
 
-    search_result = qdrant_client_instance.search(
+    search_result = app.state.context.qdrant_client.search(
         collection_name="book_content_v1",
         query_vector=query_vector,
         limit=5
@@ -73,7 +124,7 @@ def retrieve_context(query: str, context_text: Optional[str] = None) -> str:
 # --- ChatKit Assistant Definition ---
 ASSISTANT_ID = "book-rag-assistant" # Define a unique ID for the assistant
 
-@chatkit.assistant(id=ASSISTANT_ID)
+@app.state.context.chatkit.assistant(id=ASSISTANT_ID)
 async def rag_assistant(message: str, tools: list):
     """
     A RAG assistant that answers questions about the book.
@@ -91,7 +142,7 @@ This is a Context7 framework application.
     # Construct the final prompt for the LLM
     final_prompt = f"Context:\n{context}\n\nQuestion: {message}\n\nAnswer:"
     
-    chat_completion = openai_client.chat.completions.create(
+    chat_completion = await app.state.context.openai_client.chat.completions.create(
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": final_prompt},
@@ -108,18 +159,15 @@ async def create_chatkit_session(request: SessionRequest):
     Generates a short-lived Client Secret for a user to authenticate with ChatKit.
     """
     try:
-        session = await chatkit.sessions.create(user_id=request.user_id)
+        session = await app.state.context.chatkit.sessions.create(user_id=request.user_id)
         return SessionResponse(client_secret=session.client_secret)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create ChatKit session: {str(e)}")
 
 # Mount the ChatKit app to the FastAPI instance
-app.mount("/api/chat", chatkit.to_asgi())
+app.mount("/api/chat", app.state.context.chatkit.to_asgi())
 
 @app.get("/")
 def read_root():
     return {"Hello": "World", "message": "Welcome to the RAG Chatbot API"}
 
-# Note: The original /api/chat endpoint is now replaced by the ChatKit ASGI app.
-# ChatKit will handle the /api/chat route for all its interactions.
-# The `rag_assistant` will be invoked by ChatKit when a user sends a message.
