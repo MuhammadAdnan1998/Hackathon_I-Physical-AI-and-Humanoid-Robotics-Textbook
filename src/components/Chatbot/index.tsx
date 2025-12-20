@@ -1,4 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 import './Chatbot.css';
 
 const ASSISTANT_AVATAR = "A";
@@ -97,7 +101,7 @@ const Chatbot: React.FC = () => {
     }, []);
 
     const handleAskAboutSelection = () => {
-        const query = `Based on the following text, can you explain it further?\n\n---\n${selectedText}\n---`;
+        const query = `Based on the following text, can you explain it further?` + `\n\n---\n${selectedText}\n---`;
         setInputValue(query);
         setIsOpen(true);
         setAskButtonPosition({ top: 0, left: 0, display: 'none' });
@@ -132,7 +136,16 @@ const Chatbot: React.FC = () => {
                                     {msg.sender === 'user' ? USER_AVATAR : ASSISTANT_AVATAR}
                                 </div>
                                 <div className="message-content">
-                                    {msg.text}
+                                    {msg.sender === 'assistant' ? (
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            rehypePlugins={[rehypeHighlight]}
+                                        >
+                                            {msg.text}
+                                        </ReactMarkdown>
+                                    ) : (
+                                        msg.text
+                                    )}
                                     <div className="message-timestamp">{msg.timestamp}</div>
                                 </div>
                             </div>

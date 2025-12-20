@@ -202,3 +202,17 @@
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+
+/* Styles for code blocks */
+.message-content pre {
+    background-color: #2d2d2d;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.message-content code {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.9em;
+}
