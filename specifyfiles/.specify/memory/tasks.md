@@ -11,9 +11,9 @@ This task list outlines the implementation of the RAG chatbot using an open-sour
 
 **Goal**: Create a script to process and upload the book's content to the Qdrant vector store.
 
-- [ ] **T200**: Set up the vectorization script environment.
-    - [ ] **T200.1**: Create a `requirements.txt` file in the `scripts/` directory with `qdrant-client`, `beautifulsoup4`, `markdown-it-py`, and `sentence-transformers`.
-    - [ ] **T200.2**: Install the dependencies from `scripts/requirements.txt`.
+- [x] **T200**: Set up the vectorization script environment. DONE
+    - [x] **T200.1**: Create a `requirements.txt` file in the `scripts/` directory with `qdrant-client`, `beautifulsoup4`, `markdown-it-py`, and `sentence-transformers`.
+    - [x] **T200.2**: Install the dependencies from `scripts/requirements.txt`.
 
 - [ ] **T201**: Implement the content scraper in `scripts/vectorize.py`.
     - [ ] **T201.1**: Create a function to scan the `docs/` directory for `.md` and `.mdx` files.
