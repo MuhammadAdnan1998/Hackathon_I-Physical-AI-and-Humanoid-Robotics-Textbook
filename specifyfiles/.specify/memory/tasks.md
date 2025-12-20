@@ -15,23 +15,23 @@ This task list outlines the implementation of the RAG chatbot using an open-sour
     - [x] **T200.1**: Create a `requirements.txt` file in the `scripts/` directory with `qdrant-client`, `beautifulsoup4`, `markdown-it-py`, and `sentence-transformers`.
     - [x] **T200.2**: Install the dependencies from `scripts/requirements.txt`.
 
-- [ ] **T201**: Implement the content scraper in `scripts/vectorize.py`.
-    - [ ] **T201.1**: Create a function to scan the `docs/` directory for `.md` and `.mdx` files.
-    - [ ] **T201.2**: Implement logic to parse content, stripping front matter and JSX.
+- [x] **T201**: Implement the content scraper in `scripts/vectorize.py`. DONE
+    - [x] **T201.1**: Create a function to scan the `docs/` directory for `.md` and `.mdx` files.
+    - [x] **T201.2**: Implement logic to parse content, stripping front matter and JSX.
 
-- [ ] **T202**: Implement text chunking in `scripts/vectorize.py`.
-    - [ ] **T202.1**: Add a text splitter to break content into smaller chunks.
-    - [ ] **T202.2**: Attach metadata (source file, headings) to each chunk.
+- [x] **T202**: Implement text chunking in `scripts/vectorize.py`. DONE
+    - [x] **T202.1**: Add a text splitter to break content into smaller chunks.
+    - [x] **T202.2**: Attach metadata (source file, headings) to each chunk.
 
-- [ ] **T203**: Implement embedding generation in `scripts/vectorize.py`.
-    - [ ] **T203.1**: Load the `all-MiniLM-L6-v2` Sentence Transformer model.
-    - [ ] **T203.2**: Generate a vector for each text chunk.
+- [x] **T203**: Implement embedding generation in `scripts/vectorize.py`. DONE
+    - [x] **T203.1**: Load the `all-MiniLM-L6-v2` Sentence Transformer model.
+    - [x] **T203.2**: Generate a vector for each text chunk.
 
-- [ ] **T204**: Implement Qdrant vector upload in `scripts/vectorize.py`.
-    - [ ] **T204.1**: Initialize the Qdrant client.
-    - [ ] **T204.2**: Create a Qdrant collection named `book_content_v1` with the correct vector size (384).
-    - [ ] **T204.3**: Batch-upload the vectors and metadata to the collection.
-    - [ ] **T204.4**: Run the script to perform a full vectorization of the `docs/` directory.
+- [x] **T204**: Implement Qdrant vector upload in `scripts/vectorize.py`. DONE
+    - [x] **T204.1**: Initialize the Qdrant client.
+    - [x] **T204.2**: Create a Qdrant collection named `book_content_v1` with the correct vector size (384).
+    - [x] **T204.3**: Batch-upload the vectors and metadata to the collection.
+    - [x] **T204.4**: Run the script to perform a full vectorization of the `docs/` directory.
 
 ---
 
