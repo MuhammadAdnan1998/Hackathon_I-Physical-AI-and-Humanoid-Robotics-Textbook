@@ -14,6 +14,8 @@ interface Message {
     timestamp: string;
 }
 
+const HUGGING_FACE_BACKEND_URL = "https://muhammadadnan1998-hackathon-01.hf.space/api/rag/chat";
+
 const Chatbot: React.FC = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -43,7 +45,7 @@ const Chatbot: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/api/rag/chat', {
+            const response = await fetch(HUGGING_FACE_BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: inputValue }),
