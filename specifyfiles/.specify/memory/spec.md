@@ -82,13 +82,13 @@ The chatbot must be embedded within the Docusaurus site and respond only to ques
 ### 2. Contextual Mode
 The bot must specifically handle contextual queries based on user-selected text within the documentation, sending that selected text as part of the RAG prompt.
 
-### 3. Technical Stack (Advanced ChatKit Integration)
-The FastAPI server must implement the Advanced ChatKit Integration pattern.
+### 3. Technical Stack (Open-Source/Free Tier RAG Stack)
+The architecture will be built on an open-source stack, eliminating the need for paid API keys.
 
-*   **Backend Focus**: The FastAPI server must primarily expose a single, secure `/api/chatkit/session` (or `/token`) endpoint for managing ChatKit sessions.
-*   **Session Logic**: This endpoint will be responsible for securely managing the ChatKit session by generating a short-lived Client Secret (or token) required by the frontend.
-*   **RAG Integration Point**: The RAG logic (Qdrant retrieval, contextual query processing) must be integrated using the ChatKit Python SDK within the FastAPI backend, or by referencing an external OpenAI Agent Workflow ID if the RAG is hosted externally.
-*   **Frontend**: The Docusaurus React component must utilize the `@openai/chatkit-react` library to render the UI and call the FastAPI session endpoint for authentication.
+*   **LLM Backend**: The final answer generation will use the **Hugging Face Inference API**, leveraging a free-tier open-source model (e.g., Llama 3).
+*   **Embedding/Vectorization**: The vectorization pipeline will use a **local Sentence Transformer model** (e.g., `all-MiniLM-L6-v2`) to generate embeddings for content, which will be stored in a Qdrant vector database.
+*   **Backend**: A **FastAPI server** will expose a secure endpoint that handles the entire RAG pipeline. It will receive queries from the frontend, generate query embeddings, retrieve relevant context from Qdrant, and call the Hugging Face Inference API to generate a final answer.
+*   **Frontend**: The Docusaurus **React component** will render the chat UI and communicate directly with the FastAPI RAG endpoint to get responses.
 
 ### 4. Acceptance
 The bot must correctly cite sources from the book content when answering questions.

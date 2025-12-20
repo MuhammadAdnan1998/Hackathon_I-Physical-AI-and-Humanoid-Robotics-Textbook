@@ -107,69 +107,68 @@ The `sidebars.ts` file is currently configured for autogeneration (`tutorialSide
 
 ## RAG Chatbot Implementation Plan
 
-**Feature Branch**: `feat/rag-chatbot`
+**Feature Branch**: `feat/rag-chatbot-opensource`
 **Spec**: `specifyfiles/.specify/memory/spec.md#RAG-Chatbot-Integration-Feature`
 
 ### 1. Summary
-This plan details the technical implementation for a RAG (Retrieval-Augmented Generation) chatbot integrated into the Docusaurus site. The chatbot will answer user questions based on the book's content, leveraging a vectorization pipeline, a FastAPI backend, and a React-based frontend component.
+This plan details the technical implementation for a RAG (Retrieval-Augmented Generation) chatbot based on an **Open-Source/Free Tier RAG Stack**. The chatbot will answer user questions based on the book's content, leveraging a local vectorization pipeline, a Hugging Face-powered FastAPI backend, and a custom React frontend component.
 
 ### 2. Constitution Check
-*   ✅ **Technical Platform Principle**: All custom React components for the frontend will use TypeScript. The backend will use Python with FastAPI, which is a project-approved stack for this feature.
-*   ✅ **Context7 Principle**: The vectorization pipeline will be designed to handle versioned documentation by incorporating metadata during the scraping and chunking process. The RAG prompt sent to the LLM will explicitly reference the `Context7` framework to ensure responses are grounded in the correct documentation version.
-*   ✅ **Content Principle**: The chatbot's knowledge base will be derived directly from the approved weekly modules and other content pages.
-*   ✅ **Hardware Principle**: Not directly applicable to this software feature.
+*   ✅ **Technical Platform Principle**: All custom React components will use TypeScript. The backend will use Python with FastAPI.
+*   ✅ **Context7 Principle**: The vectorization pipeline will incorporate metadata to handle versioned documentation. The RAG prompt will reference the `Context7` framework.
+*   ✅ **Content Principle**: The chatbot's knowledge base will be derived directly from the approved weekly modules and content pages.
+*   ✅ **Hardware Principle**: Not applicable.
 
-### 3. Stage 1: Vectorization Pipeline
-This stage focuses on creating a script (`scripts/vectorize.py`) to process and upload the book's content to the vector store.
+### 3. Stage 1: Vectorization Pipeline (Local Embeddings)
+This stage focuses on creating a script (`scripts/vectorize.py`) to process and upload the book's content to the Qdrant vector store using a local sentence transformer.
 
 **Implementation Steps**:
-1.  **Install Dependencies**: Add `openai`, `qdrant-client`, `beautifulsoup4`, `markdown-it-py` to a `requirements.txt` for the pipeline.
+1.  **Install Dependencies**: Add `qdrant-client`, `beautifulsoup4`, `markdown-it-py`, and `sentence-transformers` to a `requirements.txt` for the pipeline.
 2.  **Content Scraper**:
     *   Implement a function to scan the `docs/` directory for all `.md` and `.mdx` files.
-    *   For each file, parse the Markdown/MDX content into clean text, stripping away front matter and JSX components to extract readable prose.
+    *   Parse the content into clean text, stripping front matter and JSX.
 3.  **Text Chunking**:
-    *   Implement a text splitter (e.g., `RecursiveCharacterTextSplitter` from LangChain or a custom implementation) to break the extracted text into smaller, semantically coherent chunks (e.g., 500-1000 characters with overlap).
-    *   Attach metadata to each chunk, including the source file path (e.g., `docs/week-1/introduction.md`) and any relevant headings to aid in citation.
-4.  **Embedding Generation**:
-    *   Initialize the OpenAI client using an API key from environment variables.
-    *   For each text chunk, call the OpenAI Embeddings API (e.g., `text-embedding-3-small`) to generate a vector.
+    *   Implement a text splitter to break the text into smaller, semantically coherent chunks (e.g., 500-1000 characters with overlap).
+    *   Attach metadata to each chunk (source file path, headings).
+4.  **Embedding Generation (Local)**:
+    *   Load a local Sentence Transformer model (e.g., `all-MiniLM-L6-v2`) from the Hugging Face library.
+    *   For each text chunk, generate a vector using the loaded model.
 5.  **Qdrant Vector Upload**:
-    *   Initialize the Qdrant client using the Cloud URL and API key from environment variables.
-    *   Create a Qdrant collection named `book_content_v1` if it doesn't exist, configuring it for the OpenAI embedding vector size (e.g., 1536).
-    *   Batch-upload the generated vectors along with their corresponding text chunks and metadata to the collection.
+    *   Initialize the Qdrant client.
+    *   Create a Qdrant collection named `book_content_v1` if it doesn't exist, configuring it for the chosen model's vector size (e.g., 384 for `all-MiniLM-L6-v2`).
+    *   Batch-upload the generated vectors and their metadata to the collection.
 
-### 4. Stage 2: FastAPI Backend Service - Advanced ChatKit Integration
-This stage focuses on creating the FastAPI backend to support the ChatKit Advanced Integration pattern.
+### 4. Stage 2: FastAPI Backend Service (Hugging Face RAG Pipeline)
+This stage focuses on creating the FastAPI backend to serve the full RAG pipeline.
 
 **Implementation Steps**:
 1.  **Server Setup**:
-    *   Create a new directory `api/`.
-    *   Set up a `main.py` file with a basic FastAPI application.
-    *   Define a `requirements.txt` with `fastapi`, `uvicorn`, `openai`, `qdrant-client`, `pydantic`, `chatkit-sdk`.
-2.  **ChatKit Session Endpoint**:
-    *   Define a POST endpoint `/api/chatkit/session` (or `/token`).
-    *   This endpoint will be responsible for securely generating and returning a short-lived Client Secret (or token) required by the frontend to initialize the ChatKit session.
-    *   Implement user authentication/authorization if necessary to secure this endpoint.
-3.  **RAG Logic Integration**:
-    *   Integrate the RAG logic (Qdrant retrieval, contextual query processing, OpenAI LLM calls) using the ChatKit Python SDK. This can involve defining a ChatKit agent that orchestrates the RAG flow.
-    *   Alternatively, if the RAG is hosted externally (e.g., as an OpenAI Agent), reference its Workflow ID within the ChatKit configuration.
-    *   The ChatKit agent will handle combining the user's query with retrieved context, constructing the LLM prompt (including `Context7` reference), sending the request to the LLM, and processing the response to extract the answer and source links.
+    *   Create `api/main.py` with a basic FastAPI application.
+    *   Define a `requirements.txt` with `fastapi`, `uvicorn`, `qdrant-client`, `pydantic`, `sentence-transformers`, and `huggingface_hub`.
+2.  **RAG Chat Endpoint**:
+    *   Define a POST endpoint `/api/rag/chat`.
+    *   This endpoint will receive a JSON payload with the user's query (`query: string`) and optional selected context (`context: string`).
+3.  **RAG Pipeline Logic**:
+    *   **Embedding**: Load the same local Sentence Transformer model (`all-MiniLM-L6-v2`) to generate an embedding for the incoming query.
+    *   **Retrieval**: Query the Qdrant `book_content_v1` collection to find the most relevant text chunks based on the query embedding.
+    *   **Prompt Construction**: Construct a detailed prompt for the LLM, combining the user's query, the retrieved context chunks, and instructions to answer based only on the provided sources.
+    *   **LLM Call**: Use the `huggingface_hub` library to call a free-tier model on the Hugging Face Inference API (e.g., a Llama 3 model). Pass the constructed prompt.
+    *   **Response**: Return a JSON response containing the generated answer and the source metadata from the retrieved chunks.
 
-### 5. Stage 3: Docusaurus Frontend Component - ChatKit Advanced Integration
-This stage focuses on integrating the ChatKit UI and functionality into the Docusaurus site using the Advanced ChatKit Integration pattern.
+### 5. Stage 3: Docusaurus Frontend Component (Custom React UI)
+This stage focuses on integrating a custom chat UI into the Docusaurus site.
 
 **Implementation Steps**:
 1.  **Component Scaffolding**:
     *   Create a new React component at `src/components/Chatbot/index.tsx`.
-    *   This component will house the entire chat interface.
-2.  **ChatKit UI Integration**:
-    *   Install the `@openai/chatkit-react` library.
-    *   Use components from `@openai/chatkit-react` to build the chat window, message list, and input field.
-    *   The component will call the FastAPI session endpoint (`/api/chatkit/session` or `/token`) for authentication and to obtain the Client Secret required for the ChatKit session.
-    *   Style the chatbot component to match the Docusaurus theme, potentially floating it in the bottom-right corner of the screen.
+2.  **Custom Chat UI**:
+    *   Build the chat interface (chat window, message list, input field) using standard React components.
+    *   Manage the conversation state (messages, loading status, errors) within the component.
+    *   On submit, make a `fetch` request to the FastAPI endpoint (`/api/rag/chat`) with the user's query.
+    *   Render the response from the backend, including the answer and source links.
+    *   Style the component to match the Docusaurus theme, floating it in the bottom-right corner.
 3.  **Context Capture Logic**:
-    *   Implement a global event listener (e.g., on `mouseup`) in the component.
-    *   When the event fires, check if `window.getSelection()` contains any text and if the selection is within the main documentation content area.
-    *   If there's a valid selection, store the selected text in the component's state and display a small "Ask about this" button near the selection. This selected text can then be passed to the ChatKit agent as additional context.
+    *   Implement a global event listener (e.g., on `mouseup`) to detect text selection in the main content area.
+    *   If text is selected, display a button (e.g., "Ask about this") that, when clicked, passes the selected text as context to the chatbot.
 4.  **Site Integration**:
     *   Import and render the `<Chatbot />` component in a global layout file, such as `src/theme/Root.tsx`, to ensure it is available on all pages.
